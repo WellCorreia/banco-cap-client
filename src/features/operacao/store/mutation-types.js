@@ -1,0 +1,1 @@
+export const SET_OPERACAO = 'OPERACAO/SET_OPERACAO';
