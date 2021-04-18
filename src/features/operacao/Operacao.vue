@@ -24,7 +24,7 @@
           <v-text-field
             v-model="dados_operacao.numeroConta"
             label="Numero Conta"
-            :rules="[v => !!v || 'É necessário Informar o número da conta']"
+            :rules=numeroRules
             required
           ></v-text-field>
 
@@ -102,7 +102,7 @@ export default {
     ...mapState('operacao', ['operacao']),
   },
   created() {
-    this.ActionListTipoOperacao();
+
   },
   methods: {
     ...mapActions('operacao', ['ActionDepositarSacar']),
@@ -131,7 +131,6 @@ export default {
           text: this.operacao.message,
           timer: 2000,
         });
-        this.$router.push({ name: 'saldo' });
       } else {
         Vue.swal.fire({
           icon: 'error',

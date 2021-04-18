@@ -7,7 +7,7 @@
             flat
             color="rgba(0, 0, 0, 0)">
             <v-toolbar-title class="title pl-0">
-              Saldo da Conta
+              Criar Conta
             </v-toolbar-title>
             <v-spacer></v-spacer>
           </v-app-bar>
@@ -20,19 +20,26 @@
             v-model="valid"
             lazy-validation
           >
-           <v-text-field
-            v-model="dados_operacao.numero"
-            label="Numero da Conta"
+
+          <v-text-field
+            v-model="dados.numero"
+            label="Numero Conta"
             :rules=numeroRules
             required
           ></v-text-field>
+
+            <v-text-field
+              v-model.lazy="valorSemMask"
+              label="Valor"
+              v-money="valor"
+              required
+            ></v-text-field>
 
             <v-btn
               color="success"
               class="mr-4 botao"
               type="submit"
-            >
-              Consultar Saldo
+            > Criar Conta
             </v-btn>
           </v-form>
           </div>
@@ -54,35 +61,36 @@ Vue.use(money, { precision: 4 });
 
 export default {
   data: () => ({
-    dados_operacao: {
-      tipo_operacao: {},
-    },
+    dados: {},
     valid: false,
     valorSemMask: null,
+    valor: {
+      decimal: ',',
+      thousands: '.',
+      prefix: 'R$ ',
+      suffix: '',
+      precision: 2,
+      masked: false, /* doesn't work with directive */
+    },
     numeroRules: [
       (v) => !!v || 'Número da Conta é obrigatório',
       (v) => (v && v.length < 6 && v.length > 6) || 'O número deve conter 6 digitos',
     ],
   }),
   computed: {
-    ...mapState('conta', ['saldo']),
+    ...mapState('conta', ['conta']),
   },
   created() {
+
   },
   methods: {
-    ...mapActions('conta', ['ActionGetSaldo']),
+    ...mapActions('conta', ['ActionCriarConta']),
 
     async save() {
       this.retiraMaskValor(this.valorSemMask);
-      this.dados_operacao.user_id = this.user.id;
-      this.dados_operacao.tipo_operacao_id = this.dados_operacao.tipo_operacao.id;
 
-      if (this.dados_operacao.valor > 0) {
-        if (this.dados_operacao.tipo_operacao.slug === 'transferencia') {
-          await this.realizarTransferencia();
-        } else {
-          await this.realizarDepositoDebito();
-        }
+      if (this.dados.valor > 0) {
+        await this.criarConta();
       } else {
         Vue.swal.fire({
           icon: 'error',
@@ -93,16 +101,15 @@ export default {
       }
     },
 
-    async realizarDepositoDebito() {
-      await this.ActionGetSaldo(this.dados);
-      if (this.conta.status === 'success') {
+    async criarConta() {
+      await this.ActionCriarConta(this.dados);
+      if (this.conta.status === 201) {
         Vue.swal.fire({
           icon: 'success',
           title: 'Salvo',
           text: this.conta.message,
           timer: 2000,
         });
-        this.$router.push({ name: 'saldo' });
       } else {
         Vue.swal.fire({
           icon: 'error',
@@ -112,12 +119,18 @@ export default {
         });
       }
     },
+
+    retiraMaskValor(valor) {
+      let resultado = valor.replace('R$ ', '');
+      resultado = resultado.replace('.', '');
+      this.dados.valor = resultado.replace(',', '.');
+    },
   },
 };
 </script>
 
 <style lang="scss">
 .botao{
-  float:right,
+  float:right
 }
 </style>

@@ -1,7 +1,7 @@
-import { store as saldo } from '@/features/saldo';
+import { store as conta } from '@/features/conta';
 import { store as operacao } from '@/features/operacao';
 
 export default {
-  saldo,
+  conta,
   operacao,
 };
