@@ -22,14 +22,14 @@
           >
 
           <v-text-field
-            v-model="dados_operacao.numeroConta"
+            v-model="dados.numeroConta"
             label="Numero Conta"
             :rules=numeroRules
             required
           ></v-text-field>
 
           <v-select
-            v-model="dados_operacao.tipo"
+            v-model="dados.tipo"
             :items="this.tipo_operacao"
             :rules="[v => !!v || 'É requerido um tipo de operação']"
             item-text="nome"
@@ -82,7 +82,7 @@ export default {
         value: 'saque',
       },
     ],
-    dados_operacao: {},
+    dados: {},
     valid: false,
     valorSemMask: null,
     valor: {
@@ -94,8 +94,10 @@ export default {
       masked: false, /* doesn't work with directive */
     },
     numeroRules: [
-      (v) => !!v || 'Número da Conta é obrigatório',
-      (v) => (v && v.length < 6 && v.length > 6) || 'O número deve conter 6 digitos',
+      (v) => !!v || 'Número da conta é obrigatório',
+      (v) => (v && v.length === 6) || 'O número deve conter 6 digitos',
+      // eslint-disable-next-line no-restricted-globals
+      (v) => (v && !isNaN(v)) || 'O número deve conter 6 digitos',
     ],
   }),
   computed: {
@@ -108,22 +110,31 @@ export default {
     ...mapActions('operacao', ['ActionDepositarSacar']),
 
     async save() {
-      this.retiraMaskValor(this.valorSemMask);
+      if (this.$refs.form.validate()) {
+        this.retiraMaskValor(this.valorSemMask);
 
-      if (this.dados_operacao.valor > 0) {
-        await this.realizarDepositoDebito();
+        if (this.dados.valor > 0) {
+          await this.realizarDepositoDebito();
+        } else {
+          Vue.swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'É necessário informar um maior maior que zero.',
+            timer: 2000,
+          });
+        }
       } else {
         Vue.swal.fire({
           icon: 'error',
           title: 'Erro',
-          text: 'É necessário informar um maior maior que zero.',
+          text: 'Preencha os campos obrigatórios',
           timer: 2000,
         });
       }
     },
 
     async realizarDepositoDebito() {
-      await this.ActionDepositarSacar(this.dados_operacao);
+      await this.ActionDepositarSacar(this.dados);
       if (this.operacao.status === 200) {
         Vue.swal.fire({
           icon: 'success',
@@ -144,7 +155,7 @@ export default {
     retiraMaskValor(valor) {
       let resultado = valor.replace('R$ ', '');
       resultado = resultado.replace('.', '');
-      this.dados_operacao.valor = resultado.replace(',', '.');
+      this.dados.valor = resultado.replace(',', '.');
     },
   },
 };

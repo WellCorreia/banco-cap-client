@@ -104,8 +104,9 @@ export default {
     status: null,
     valid: false,
     numeroRules: [
-      (v) => !!v || 'Número da Conta é obrigatório',
-      (v) => (v && v.length < 6 && v.length > 6) || 'O número deve conter 6 digitos',
+      (v) => !!v || 'Número da conta é obrigatório',
+      (v) => (v && v.length === 6) || 'O número deve conter 6 digitos',
+      (v) => (v && !isNaN(v)) || 'O campo só deve conter números',
     ],
   }),
   computed: {
@@ -117,7 +118,16 @@ export default {
     ...mapActions('conta', ['ActionGetSaldo']),
 
     async save() {
-      await this.getSaldo();
+      if (this.$refs.form.validate()) {
+        await this.getSaldo();
+      } else {
+        Vue.swal.fire({
+          icon: 'error',
+          title: 'Erro',
+          text: 'Preencha os campos obrigatórios',
+          timer: 2000,
+        });
+      }
     },
 
     async getSaldo() {

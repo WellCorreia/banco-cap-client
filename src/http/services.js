@@ -1,7 +1,7 @@
-import { services as operacao } from '@/features/operacao';
 import { services as conta } from '@/features/conta';
+import { services as operacao } from '@/features/operacao';
 
 export default {
-  conta,
   operacao,
+  conta,
 };

@@ -73,8 +73,10 @@ export default {
       masked: false, /* doesn't work with directive */
     },
     numeroRules: [
-      (v) => !!v || 'Número da Conta é obrigatório',
-      (v) => (v && v.length < 6 && v.length > 6) || 'O número deve conter 6 digitos',
+      (v) => !!v || 'Número da conta é obrigatório',
+      (v) => (v && v.length === 6) || 'O número deve conter 6 digitos',
+      // eslint-disable-next-line no-restricted-globals
+      (v) => (v && !isNaN(v)) || 'O campo só deve conter números',
     ],
   }),
   computed: {
@@ -87,15 +89,24 @@ export default {
     ...mapActions('conta', ['ActionCriarConta']),
 
     async save() {
-      this.retiraMaskValor(this.valorSemMask);
+      if (this.$refs.form.validate()) {
+        this.retiraMaskValor(this.valorSemMask);
 
-      if (this.dados.valor > 0) {
-        await this.criarConta();
+        if (this.dados.valor > 0) {
+          await this.criarConta();
+        } else {
+          Vue.swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'É necessário informar um maior maior que zero.',
+            timer: 2000,
+          });
+        }
       } else {
         Vue.swal.fire({
           icon: 'error',
           title: 'Erro',
-          text: 'É necessário informar um maior maior que zero.',
+          text: 'Preencha os campos obrigatórios',
           timer: 2000,
         });
       }

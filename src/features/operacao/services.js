@@ -1,5 +1,5 @@
 export default {
-  operacao: {
+  createTransaction: {
     method: 'post',
     url: 'transacoes',
   },
