@@ -7,4 +7,8 @@ export default {
     method: 'post',
     url: 'contas',
   },
+  createTransaction: {
+    method: 'post',
+    url: 'transacoes',
+  },
 };

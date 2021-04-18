@@ -37,7 +37,7 @@
 
             <v-btn
               color="success"
-              class="mr-4 botao"
+              class="mr-4"
               type="submit"
             > Criar Conta
             </v-btn>
